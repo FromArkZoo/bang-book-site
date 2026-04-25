@@ -4,7 +4,7 @@ Marketing site for my children's science book *What was that BANG?!?* (Troubador
 
 **Live:** [jamesbrownebooks.com](https://jamesbrownebooks.com/)
 
-![Hero](screenshot-hero.png)
+![Demo](demo.gif)
 
 A single HTML file — no build step, no framework. The centrepiece is a hand-rolled 3D book preview that flips through real pages: per-sheet z-index management to prevent 3D clipping, mobile/desktop transform-scaling so the open spread fits any viewport, CSS-only spine shadows for depth. Tailwind via CDN, Font Awesome for icons, ~100 lines of vanilla JS for the flipper.
 

@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What was that BANG?!? - Book Landing Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom Background Animations */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+        @keyframes bounce-x {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(25%); }
+        }
+        .animate-bounce-x {
+            animation: bounce-x 1.5s infinite;
+        }
+        
+        /* Realistic 3D Book Mechanics */
+        .perspective-3000 {
+            perspective: 3000px;
+        }
+        .transform-style-3d {
+            transform-style: preserve-3d;
+        }
+        
+        /* Wrapper scaling and positioning for Mobile vs Desktop */
+        .book-wrapper {
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* On mobile, shift right and scale down so the 2-page spread fits the screen perfectly */
+        .book-wrapper.is-open {
+            transform: translateX(50%) scale(0.55); 
+        }
+        @media (min-width: 640px) { /* sm */
+            .book-wrapper.is-open {
+                transform: translateX(50%) scale(0.68); 
+            }
+        }
+        @media (min-width: 1024px) { /* lg - Desktop stays in place! */
+            .book-wrapper.is-open {
+                transform: translateX(0%) scale(1); 
+            }
+        }
+
+        /* Individual Sheets */
+        .sheet {
+            position: absolute;
+            inset: 0;
+            transform-origin: left center;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sheet.flipped {
+            transform: rotateY(-180deg);
+        }
+
+        /* Front and Back of each page (No overflow scroll to prevent 3D clipping bugs) */
+        .page-front, .page-back {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            background-color: #fdfcf9;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.02);
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        .page-front {
+            border-radius: 0.25rem 1.25rem 1.25rem 0.25rem; /* Right side corners */
+            transform: rotateY(0deg);
+            z-index: 2;
+        }
+        .page-back {
+            border-radius: 1.25rem 0.25rem 0.25rem 1.25rem; /* Left side corners */
+            transform: rotateY(180deg);
+            z-index: 1;
+        }
+
+        /* Realistic Spine Shadows */
+        .page-front::after {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 35px;
+            background: linear-gradient(to right, rgba(0,0,0,0.12), transparent);
+            pointer-events: none;
+        }
+        .page-back::after {
+            content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 35px;
+            background: linear-gradient(to left, rgba(0,0,0,0.12), transparent);
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 overflow-x-hidden">
+
+    <nav class="fixed w-full bg-white/90 backdrop-blur-md z-50 border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center transform -rotate-12">
+                        <i class="fa-solid fa-wand-magic-sparkles text-white text-lg"></i>
+                    </div>
+                    <span class="font-black text-2xl tracking-tighter text-slate-900">
+                        BANG<span class="text-red-500">?!?</span>
+                    </span>
+                </div>
+                <div class="hidden md:flex space-x-8 font-bold text-slate-600">
+                    <a href="#story" class="hover:text-red-500 transition-colors">The Story</a>
+                    <a href="#journey" class="hover:text-red-500 transition-colors">The Journey</a>
+                    <a href="#parents" class="hover:text-red-500 transition-colors">For Parents</a>
+                </div>
+                <div>
+                    <a href="https://buy.stripe.com/eVq8wQ86ibZkafLd0bao800" target="_blank" rel="noopener noreferrer" class="bg-red-500 hover:bg-red-600 text-white px-6 py-2.5 rounded-full font-bold shadow-lg shadow-red-500/30 flex items-center gap-2 transition-transform hover:scale-105 inline-flex">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span class="hidden sm:inline">Order Now</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="relative pt-32 pb-32 lg:pt-48 lg:pb-40 bg-amber-100">
+        <div class="absolute top-20 left-10 w-64 h-64 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob pointer-events-none"></div>
+        <div class="absolute top-40 right-10 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000 pointer-events-none"></div>
+        <div class="absolute -bottom-8 left-1/2 w-80 h-80 bg-cyan-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-4000 pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                
+                <div class="text-center lg:text-left relative z-10">
+                    <div class="inline-block bg-white px-4 py-1.5 rounded-full font-bold text-sm text-red-500 tracking-wide mb-6 shadow-sm border border-red-100">
+                        A Graphic Educational Fiction Novel
+                    </div>
+                    <h1 class="text-5xl lg:text-7xl font-black text-slate-900 leading-[1.1] mb-6 drop-shadow-sm">
+                        What was that <br/>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500 inline-block transform -rotate-2">
+                            BANG?!?
+                        </span>
+                    </h1>
+                    <p class="text-xl lg:text-2xl text-slate-700 font-medium mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+                        A simple question sparks a mind-blowing journey! Join Bean and his dad on an epic adventure exploring how sound travels from source to our conscious perception.
+                    </p>
+                    
+                    <div class="flex justify-center lg:justify-start mt-6">
+                        <button onclick="toggleBook()" id="excerpt-btn" class="flex items-center gap-4 text-red-500 font-black text-2xl hover:text-red-600 transition-colors group cursor-pointer z-50 relative">
+                            <span id="excerpt-text">Read an Excerpt</span>
+                            <i class="fa-solid fa-arrow-right-long text-4xl animate-bounce-x drop-shadow-md" id="excerpt-icon"></i>
+                        </button>
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-red-500/10 inline-block text-left">
+                        <p class="text-slate-700 font-medium leading-relaxed">
+                            <i class="fa-solid fa-book-open text-red-400 mr-2"></i> 72-Page Paperback • <span class="text-green-600 font-bold">Available Now!</span><br/>
+                            <i class="fa-solid fa-barcode text-red-400 mr-2 mt-1"></i> ISBN: <span class="font-bold text-slate-900">978-1-80634-016-3</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="relative flex flex-col items-center w-full z-20 mt-16 lg:mt-0">
+                    
+                    <div id="book-wrapper" class="book-wrapper relative w-[320px] sm:w-[440px] lg:w-[540px] h-[480px] sm:h-[660px] lg:h-[810px] perspective-3000 mx-auto">
+                        <div id="the-book" class="relative w-full h-full transform-style-3d">
+                            
+                            <div class="absolute inset-0 bg-slate-50 border border-slate-200 rounded-r-2xl rounded-l-sm shadow-2xl flex flex-col items-center justify-center text-center p-5 sm:p-8 -z-10">
+                                <i class="fa-solid fa-wand-magic-sparkles text-6xl text-slate-300 mb-6"></i>
+                                <h3 class="text-2xl font-black text-slate-400 opacity-60 mb-6">End of Preview</h3>
+                                <p class="text-sm sm:text-lg lg:text-xl font-bold text-red-600 border-t-4 border-red-200 pt-6">Find out the rest of the story inside the book! <br class="hidden sm:block" /> Scroll down to order your copy.</p>
+                            </div>
+
+                            <div id="sheet-3" class="sheet">
+                                <div class="page-front p-5 sm:p-8 lg:p-10">
+                                    <h4 class="font-black text-lg sm:text-xl lg:text-2xl text-slate-800 mb-3 sm:mb-4 lg:mb-5 border-b border-red-200 pb-2">(Page 20)</h4>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> High-pitch sound waves, like a bird singing, will move the floor towards the lower part of the spiral. The hairs towards the lower end of the spiral will get bent when that happens. What do you think might happen with a low-pitch sound like thunder?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> Maybe... the opposite of a high-pitch sound...</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Which is?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> It moves the floor higher up the spiral...</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Go on...</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> And then bends the hairs and sends a message to the brain.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Great! You figured it out by thinking it through. When the brain receives the message, it knows where it's being sent from in the cochlea. That's how we know the difference between high- and low-pitch sounds.</p>
+                                    <div class="absolute bottom-4 right-6 font-black text-slate-400 text-xs sm:text-sm">20</div>
+                                </div>
+                                <div class="page-back flex flex-col items-center justify-center p-5 sm:p-8 lg:p-10 text-center bg-red-50 border-r border-slate-200">
+                                    <i class="fa-solid fa-brain text-5xl sm:text-6xl lg:text-7xl text-red-400 mb-4 lg:mb-6 drop-shadow-md"></i>
+                                    <h3 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 mb-4 leading-tight">And then what happens?!</h3>
+                                    <p class="text-sm sm:text-base lg:text-lg text-slate-700 font-medium leading-relaxed">Does the brain understand the sound right away? How does it become a memory?</p>
+                                </div>
+                            </div>
+
+                            <div id="sheet-2" class="sheet">
+                                <div class="page-front p-5 sm:p-8 lg:p-10">
+                                    <h4 class="font-black text-lg sm:text-xl lg:text-2xl text-slate-800 mb-3 sm:mb-4 lg:mb-5 border-b border-red-200 pb-2">(Page 18)</h4>
+                                    <div class="mb-3 sm:mb-4 bg-white border-2 border-slate-100 p-2 sm:p-3 rounded-2xl shadow-sm">
+                                        <img src="16.png" onerror="this.style.display='none'" class="w-full max-h-20 sm:max-h-28 lg:max-h-36 object-contain rounded-xl" alt="Cochlea Illustration">
+                                    </div>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> The stapes is the smallest bone in your body. The eardrum is much wider than the end of the stapes. The force moving the eardrum gets transferred across to the stapes. This focuses the movement of the eardrum's wide area onto the small end of the stapes. This increases the pressure of the stapes vibrating into the cochlea.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> Got it. What happens after the stapes vibrates into the cochlea?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Well, the cochlea is full of liquid.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> Liquid?!</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Yup. As the stapes vibrates backwards and forwards into the cochlea, it pushes the liquid. This produces waves in the liquid. These waves travel up the cochlea.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> Okay... can we go inside and have a look?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Of course! Snorkels on. Let's go inside!</p>
+                                    <div class="absolute bottom-4 right-6 font-black text-slate-400 text-xs sm:text-sm">18</div>
+                                </div>
+                                <div class="page-back p-5 sm:p-8 lg:p-10 border-r border-slate-200">
+                                    <h4 class="font-black text-lg sm:text-xl lg:text-2xl text-slate-800 mb-3 sm:mb-4 lg:mb-5 border-b border-red-200 pb-2">INSIDE THE COCHLEA (Page 19)</h4>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> As we can see, the cochlea is a spiral shape. It's divided into three sections that spiral round to its top. One for the wave to travel up the spiral, and one for the wave to travel down.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> And the one in the middle?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> This is the cochlea duct. As the waves travel up the spiral, they spread out. As they spread out, the waves travel through the floor, down to the cochlea duct.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> But why is the cochlea duct there?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> It's very important. As the waves travel through, they can make its floor vibrate up and down.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> And that's important because...?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Along the cochlea duct's floor, all the way up the spiral, there are tiny hairs. When a part of the floor moves up, the hairs at that location get bent against a barrier above them.</p>
+                                    <div class="absolute bottom-4 left-6 font-black text-slate-400 text-xs sm:text-sm">19</div>
+                                </div>
+                            </div>
+
+                            <div id="sheet-1" class="sheet">
+                                <div class="page-front p-5 sm:p-8 lg:p-10">
+                                    <h4 class="font-black text-lg sm:text-xl lg:text-2xl text-slate-800 mb-3 sm:mb-4 lg:mb-5 border-b border-red-200 pb-2">MIDDLE EAR (Page 16)</h4>
+                                    <div class="mb-3 sm:mb-4 bg-white border-2 border-slate-100 p-2 sm:p-3 rounded-2xl shadow-sm">
+                                        <img src="13.png" onerror="this.style.display='none'" class="w-full max-h-20 sm:max-h-28 lg:max-h-36 object-contain rounded-xl" alt="Middle Ear Illustration">
+                                    </div>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Let's go further into the ear and see what happens next.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> Great!</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[10px] sm:text-[11px] lg:text-xs italic text-slate-400">Meabo and Bean enter the ear.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> The sound waves travel into your ear and through this tunnel called the ear canal. At the end of the tunnel, they hit the eardrum.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> Like a drum you hit?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Yes. When a sound wave hits the eardrum, it vibrates backwards and forwards.</p>
+                                    <div class="absolute bottom-4 right-6 font-black text-slate-400 text-xs sm:text-sm">16</div>
+                                </div>
+                                <div class="page-back p-5 sm:p-8 lg:p-10 border-r border-slate-200">
+                                    <h4 class="font-black text-lg sm:text-xl lg:text-2xl text-slate-800 mb-3 sm:mb-4 lg:mb-5 border-b border-red-200 pb-2">(Page 17)</h4>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> I... feel... dizzy...</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> Shall we go around the other side and see what happens next?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> Absolutely!</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> There is a bone connected to the eardrum called the malleus. What do you think happens to the malleus as the eardrum vibrates?</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-cyan-600">BEAN:</span> If the malleus is connected to the eardrum, I guess it'll move when the eardrum moves.</p>
+                                    <p class="mb-2 sm:mb-3 lg:mb-4 text-[11px] sm:text-[13px] lg:text-[15px] leading-relaxed"><span class="font-bold text-red-500">MEABO:</span> It does indeed. The sound waves cause the eardrum to vibrate. And you're right: because it's connected to the malleus, it also makes that bone vibrate. Connected to the malleus is the incus bone, and connected to the incus is the stapes bone.</p>
+                                    <div class="absolute bottom-4 left-6 font-black text-slate-400 text-xs sm:text-sm">17</div>
+                                </div>
+                            </div>
+
+                            <div id="sheet-0" class="sheet cursor-pointer group" onclick="toggleBook()">
+                                <div class="page-front bg-white border border-slate-200 shadow-xl group-hover:border-red-300 transition-colors">
+                                    <img src="bbang.jpg" onerror="this.onerror=null; this.src='https://placehold.co/600x800/ffffff/ef4444?text=Cover'" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]" alt="Book Cover: What was that BANG?!?">
+                                </div>
+                                <div class="page-back bg-[#fdfcf9] flex flex-col items-center justify-center p-8 lg:p-12 text-center border-r border-slate-200">
+                                    <div class="mb-8">
+                                        <i class="fa-solid fa-wand-magic-sparkles text-red-400 text-4xl mb-4"></i>
+                                    </div>
+                                    <h3 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-800 mb-4 leading-tight">What was that<br><span class="text-red-500 mt-2 block">BANG?!?</span></h3>
+                                    <p class="text-lg lg:text-xl text-slate-500 font-bold tracking-wide mt-8">Written by James Browne</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div id="book-controls" class="absolute -bottom-24 sm:-bottom-32 left-0 right-0 flex justify-center items-center gap-6 sm:gap-12 opacity-0 pointer-events-none transition-all duration-700 translate-y-4">
+                        <button onclick="prevPage()" id="btn-prev" class="bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200 px-8 sm:px-12 py-5 sm:py-6 rounded-full font-black text-xl sm:text-2xl shadow-xl flex items-center gap-3 transition-transform hover:-translate-y-1 disabled:opacity-40 disabled:hover:translate-y-0 disabled:cursor-not-allowed">
+                            <i class="fa-solid fa-arrow-left"></i> <span>Back</span>
+                        </button>
+                        
+                        <button onclick="nextPage()" id="btn-next" class="bg-red-500 hover:bg-red-600 text-white border-2 border-red-500 hover:border-red-600 px-8 sm:px-12 py-5 sm:py-6 rounded-full font-black text-xl sm:text-2xl shadow-xl shadow-red-500/40 flex items-center gap-3 transition-transform hover:-translate-y-1 disabled:opacity-40 disabled:hover:translate-y-0 disabled:cursor-not-allowed">
+                            <span>Next Page</span> <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="story" class="py-24 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                <div class="order-2 lg:order-1">
+                    <img 
+                        src="49.png" 
+                        onerror="this.onerror=null; this.src='https://placehold.co/800x600/fef3c7/b45309?text=Dad+and+Bean+(49.png)'"
+                        alt="Dad and Bean on the couch imagining different things" 
+                        class="w-full h-auto rounded-3xl shadow-2xl border-8 border-yellow-100 transform -rotate-1 hover:rotate-1 transition-transform"
+                    />
+                </div>
+                <div class="order-1 lg:order-2">
+                    <h2 class="text-4xl font-black text-slate-900 mb-6">"Was there a bang hiding in the balloon?"</h2>
+                    <div class="w-20 h-2 bg-cyan-400 rounded-full mb-8"></div>
+                    <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                        "What was that?!" asks inquisitive 9-year-old Bean. <br/>
+                        "It was a balloon bursting," responds his seemingly sure-footed father Meabo.
+                    </p>
+                    <p class="text-lg text-slate-600 mb-6 leading-relaxed">
+                        As is often the case with children, a simple question can easily lead a conversation down a rabbit hole of what, why, when, and how. So begins a journey deeper (both physiologically and intellectually) than Bean had ever thought possible.
+                    </p>
+                    <p class="text-lg text-slate-600 leading-relaxed font-semibold">
+                        In a world where information is literally at our fingertips, simple factual answers often lack context. This story takes a different approach!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="journey" class="py-24 bg-slate-900 text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <path d="M0,50 Q25,25 50,50 T100,50 L100,100 L0,100 Z" fill="#06b6d4"/>
+            </svg>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-4xl md:text-5xl font-black mb-6">Shrink Down & Dive In!</h2>
+                <p class="text-xl text-slate-300">
+                    Through playful conversation and incredible illustrations, readers take a literal journey through the human body to see how sound works.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-slate-800 rounded-3xl overflow-hidden border border-slate-700 hover:border-cyan-400 transition-colors group">
+                    <div class="h-64 overflow-hidden p-6 bg-white flex items-center justify-center">
+                        <img src="13.png" onerror="this.onerror=null; this.src='https://placehold.co/400x400/f8fafc/0f172a?text=Sound+Wave+(13.png)'" alt="Sound wave entering ear" class="h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-wave-square text-cyan-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Ride the Soundwaves</h3>
+                        <p class="text-slate-400">Stand right on the eardrum and watch how invisible waves in the air become powerful vibrations.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-3xl overflow-hidden border border-slate-700 hover:border-pink-400 transition-colors group transform md:-translate-y-8">
+                    <div class="h-64 overflow-hidden p-6 bg-white flex items-center justify-center">
+                        <img src="16.png" onerror="this.onerror=null; this.src='https://placehold.co/400x400/f8fafc/0f172a?text=Cochlea+(16.png)'" alt="Swimming inside the cochlea" class="h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 bg-pink-500/20 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-ear-listen text-pink-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Swim the Cochlea</h3>
+                        <p class="text-slate-400">Put on your scuba gear! Dive into the fluid-filled inner ear where vibrations turn into electrical signals.</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 rounded-3xl overflow-hidden border border-slate-700 hover:border-yellow-400 transition-colors group">
+                    <div class="h-64 overflow-hidden p-6 bg-white flex items-center justify-center">
+                        <img src="26.png" onerror="this.onerror=null; this.src='https://placehold.co/400x400/f8fafc/0f172a?text=Neuron+(26.png)'" alt="Walking on a neuron" class="h-full object-contain group-hover:scale-110 transition-transform duration-500" />
+                    </div>
+                    <div class="p-8">
+                        <div class="w-12 h-12 bg-yellow-500/20 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fa-solid fa-brain text-yellow-400 text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Walk a Real Neuron</h3>
+                        <p class="text-slate-400">Follow the electrical charges along the nervous system straight into the brain's processing centers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="parents" class="py-24 bg-cyan-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white rounded-[3rem] p-8 md:p-16 shadow-xl border border-cyan-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-8 opacity-10">
+                    <i class="fa-solid fa-lightbulb text-cyan-500" style="font-size: 12rem;"></i>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 relative z-10 items-center">
+                    <div>
+                        <h2 class="text-3xl md:text-4xl font-black text-slate-900 mb-6">More Than Just Fun Facts</h2>
+                        <p class="text-lg text-slate-600 mb-8 leading-relaxed">
+                            Unlike typical science books that just list facts for kids to memorize (and easily forget), 
+                            <span class="font-bold text-slate-800"> What was that BANG?!?</span> uses the classic Socratic method.
+                        </p>
+                        
+                        <ul class="space-y-6">
+                            <li class="flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-cyan-100 flex items-center justify-center shrink-0 mt-1">
+                                    <div class="w-3 h-3 bg-cyan-500 rounded-full"></div>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-xl">Develops Logical Thought</h4>
+                                    <p class="text-slate-600 mt-1">Shows kids *how* to think through a problem, developing the scientific method naturally.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center shrink-0 mt-1">
+                                    <div class="w-3 h-3 bg-pink-500 rounded-full"></div>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-xl">Encourages Active Questioning</h4>
+                                    <p class="text-slate-600 mt-1">Celebrates curiosity and teaches children not to settle for abstract analogies.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-4">
+                                <div class="w-8 h-8 rounded-full bg-yellow-100 flex items-center justify-center shrink-0 mt-1">
+                                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-xl">Instills a Growth Mindset</h4>
+                                    <p class="text-slate-600 mt-1">Empowers 8-12 year olds to tackle complex physiological concepts with confidence.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="relative">
+                        <img 
+                            src="56.png" 
+                            onerror="this.onerror=null; this.src='https://placehold.co/800x600/f8fafc/0f172a?text=Memory+(56.png)'"
+                            alt="Memory organization illustration" 
+                            class="w-full rounded-2xl shadow-lg border-4 border-slate-50"
+                        />
+                        <div class="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-xl max-w-xs border border-slate-100">
+                            <p class="font-bold text-sm text-slate-800">"A beautiful way to explore conscious perception and memory!"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="pt-24 pb-12 bg-amber-400 relative">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-8">Meet the mind behind the adventure!</h2>
+            
+            <div class="bg-white/80 backdrop-blur rounded-3xl p-8 shadow-xl inline-block text-left border-2 border-white">
+                <div class="flex flex-col sm:flex-row gap-8 items-center">
+                    <div class="w-32 h-32 bg-slate-200 rounded-full shrink-0 border-4 border-white shadow-md overflow-hidden flex items-center justify-center">
+                        <img 
+                            src="author.jpg" 
+                            onerror="this.onerror=null; this.src='https://placehold.co/400x400/f8fafc/0f172a?text=Author'" 
+                            alt="Author James Browne" 
+                            class="w-full h-full object-cover"
+                        />
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-slate-900 mb-2">Written by James Browne</h3>
+                        <p class="text-slate-700 max-w-md">
+                            James Browne is the loving husband and father of two amazing children. He has a big imagination and a hunger for understanding the world around us.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-20 bg-red-500 relative overflow-hidden">
+        <div class="absolute inset-0 opacity-30">
+            <div class="absolute w-[30rem] h-[30rem] bg-yellow-400 rounded-full blur-3xl -top-20 -left-20"></div>
+            <div class="absolute w-[30rem] h-[30rem] bg-orange-400 rounded-full blur-3xl -bottom-20 -right-20"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="bg-white rounded-[2rem] sm:rounded-[3rem] p-8 sm:p-12 shadow-2xl border-8 border-red-600/30">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    
+                    <div class="order-2 lg:order-1 relative">
+                        <img 
+                            src="68.png" 
+                            onerror="this.onerror=null; this.src='https://placehold.co/800x600/fef3c7/b45309?text=Party+Scene+(68.png)'"
+                            alt="Party scene with Bean and Meabo ducking from a loud bang" 
+                            class="w-full h-auto rounded-3xl shadow-xl border-4 border-yellow-100 transform -rotate-2 hover:rotate-0 transition-transform duration-500"
+                        />
+                    </div>
+                    
+                    <div class="order-1 lg:order-2 text-center lg:text-left">
+                        <h2 class="text-4xl sm:text-5xl font-black text-slate-900 mb-6 leading-tight">So... was there a bang inside the balloon?</h2>
+                        <p class="text-xl text-slate-600 mb-8 leading-relaxed">
+                            Join Bean and Meabo to find out! Grab your copy today and embark on a mind-expanding adventure perfect for curious 8-12 year olds.
+                        </p>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center">
+                            <a href="https://buy.stripe.com/eVq8wQ86ibZkafLd0bao800" target="_blank" rel="noopener noreferrer" class="bg-red-500 hover:bg-red-600 text-white px-8 py-4 rounded-full font-black text-lg shadow-xl shadow-red-500/30 flex items-center justify-center gap-3 transition-transform hover:scale-105 w-full sm:w-auto inline-flex">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                                Buy Direct - £10.99
+                            </a>
+
+                            <a href="https://www.amazon.co.uk/What-was-that-Bang-Understanding/dp/180634016X/ref=sr_1_1?crid=1TUYQJKJWZJQ6&dib=eyJ2IjoiMSJ9.1S_ib8XJfv_AFx6nvqCWow9D7zO1a3u-sYhgmsml2BDGjHj071QN20LucGBJIEps.NKb3hJSe-nKKTmrH8oUI0CqSVyU6bLX8rtKBoHGB63Y&dib_tag=se&keywords=what+was+that+bang&qid=1772297971&sprefix=what+was+that+bang%2Caps%2C233&sr=8-1" target="_blank" rel="noopener noreferrer" class="bg-[#FF9900] hover:bg-[#e68a00] text-slate-900 px-8 py-4 rounded-full font-black text-lg shadow-xl shadow-orange-500/30 flex items-center justify-center gap-3 transition-transform hover:scale-105 w-full sm:w-auto inline-flex">
+                                <i class="fa-brands fa-amazon text-xl"></i>
+                                Buy on Amazon
+                            </a>
+                        </div>
+                        <p class="mt-6 text-slate-500 font-medium">
+                            ISBN: <span class="font-bold text-slate-700">978-1-80634-016-3</span>
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 text-slate-400 py-12 text-center">
+        <div class="max-w-7xl mx-auto px-4">
+            <p class="mb-2">© 2026 James Browne & Troubador Publishing. All rights reserved.</p>
+            <p class="text-sm">Children's / Teenage general interest: Science and technology</p>
+        </div>
+    </footer>
+
+    <script>
+        const totalSheets = 4; // Cover (0) + Sheet 1 + Sheet 2 + Sheet 3
+        let currentIndex = 0; 
+        
+        // Setup initial Z-indexes so the book stacks properly
+        function initBook() {
+            updateBookUI();
+        }
+
+        function updateBookUI() {
+            const wrapper = document.getElementById('book-wrapper');
+            const controls = document.getElementById('book-controls');
+            const excerptText = document.getElementById('excerpt-text');
+            const excerptIcon = document.getElementById('excerpt-icon');
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+
+            // Manage Book Wrapper Open/Closed state
+            if (currentIndex === 0) {
+                // CLOSED
+                wrapper.classList.remove('is-open');
+                
+                controls.style.opacity = '0';
+                controls.style.pointerEvents = 'none';
+                controls.style.transform = 'translateY(1rem)';
+                
+                excerptText.innerText = 'Read an Excerpt';
+                excerptIcon.className = 'fa-solid fa-arrow-right-long text-4xl animate-bounce-x drop-shadow-md';
+            } else {
+                // OPEN
+                wrapper.classList.add('is-open');
+                
+                controls.style.opacity = '1';
+                controls.style.pointerEvents = 'auto';
+                controls.style.transform = 'translateY(0)';
+                
+                excerptText.innerText = 'Close Preview';
+                excerptIcon.className = 'fa-solid fa-xmark text-3xl ml-2';
+                
+                // Toggle text of the back button based on context
+                if (currentIndex === 1) {
+                    btnPrev.innerHTML = '<i class="fa-solid fa-book"></i> <span>Close Book</span>';
+                } else {
+                    btnPrev.innerHTML = '<i class="fa-solid fa-arrow-left"></i> <span>Previous</span>';
+                }
+                
+                btnNext.disabled = (currentIndex === totalSheets);
+            }
+
+            // Apply 3D flips and dynamic Z-indexes to prevent clipping
+            for (let i = 0; i < totalSheets; i++) {
+                const sheet = document.getElementById(`sheet-${i}`);
+                if (sheet) {
+                    if (i < currentIndex) {
+                        // This sheet has been turned (It is now on the LEFT)
+                        sheet.classList.add('flipped');
+                        // Lowest sheet turned should have lowest z-index on the left stack
+                        sheet.style.zIndex = i + 1; 
+                    } else {
+                        // This sheet has NOT been turned (It is still on the RIGHT)
+                        sheet.classList.remove('flipped');
+                        // Highest sheet not turned should have highest z-index on the right stack
+                        sheet.style.zIndex = 40 - i;
+                    }
+                }
+            }
+        }
+
+        function toggleBook() {
+            if (currentIndex === 0) {
+                currentIndex = 1;
+            } else {
+                currentIndex = 0;
+            }
+            updateBookUI();
+        }
+
+        function openBook() {
+            if (currentIndex === 0) {
+                currentIndex = 1;
+                updateBookUI();
+            }
+        }
+
+        function nextPage() {
+            if (currentIndex < totalSheets) {
+                currentIndex++;
+                updateBookUI();
+            }
+        }
+
+        function prevPage() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateBookUI();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", initBook);
+    </script>
+
+</body>
+</html>
